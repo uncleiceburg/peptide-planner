@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" data-pwa="1"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#152c59">
+<title>Peptide Planner</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="stylesheet" href="styles.css">
+</head><body>
+<header class="top"><h1>Peptide Planner</h1><div id="savestatus" role="status" aria-live="polite">Loading…</div></header>
+<main>
+<section data-tab="calendar" id="tab-calendar">
+  <div class="panel">
+    <div class="monthbar"><button class="btn small noprint" id="prev" aria-label="Previous month">◀</button><h2 id="monthname"></h2><button class="btn small noprint" id="next" aria-label="Next month">▶</button></div>
+    <div class="actions noprint" style="margin:0 0 8px"><button class="btn small" id="todaybtn">Today</button><button class="btn small" id="viewtoggle" aria-pressed="false">List view</button><button class="btn small" id="printbtn">Print month</button><button class="btn small" id="csvbtn">Month CSV</button></div>
+    <div id="printhead"></div>
+    <div id="monthview"><div class="cal" id="cal" role="grid" aria-label="Month calendar"></div></div>
+    <div id="listview" class="hidden" aria-label="Daily list"></div>
+    <p class="hint noprint" id="calcount"></p>
+  </div>
+</section>
+<section data-tab="day" id="tab-day" class="hidden" aria-labelledby="daytitle">
+  <div class="panel">
+    <div class="daybar noprint"><button class="btn backbtn" id="dayback" type="button" aria-label="Back to month view"><span aria-hidden="true">←</span> Back</button><button class="btn small" id="daytoday" type="button">Today</button></div>
+    <div class="daynav"><button class="btn small noprint" id="dayprev" type="button" aria-label="Previous day">◀</button><h2 id="daytitle" tabindex="-1"></h2><button class="btn small noprint" id="daynext" type="button" aria-label="Next day">▶</button></div>
+    <p class="hint noprint" id="dayhint">Swipe left/right or use ◀ ▶ for other days. Back, Escape or your phone's back gesture returns to the month.</p>
+    <div id="daybody"></div>
+  </div>
+</section>
+<section data-tab="plans" id="tab-plans" class="hidden"><div class="panel"><h2>Your plans</h2><div id="planlist"></div><div class="actions"><button class="btn primary" id="newplan">+ Add plan</button></div></div></section>
+<section data-tab="editor" id="tab-editor" class="hidden">
+  <div class="panel">
+    <h2 id="editortitle">Add a plan</h2>
+    <div class="notice">Scheduling and calculation tool only, not a prescriber. Enter a verified product-specific schedule or explicit steps from your prescriber/clinician. A target dose alone never generates a titration here.</div>
+    <div class="f"><label for="compound">1. Compound</label><select id="compound"></select></div>
+    <div class="f hidden" id="customnamewrap"><label for="customname">Custom compound name</label><input id="customname" maxlength="120" autocomplete="off"></div>
+    <div id="compoundinfo"></div>
+    <div class="f"><label for="presentation">2. Presentation / formulation</label><select id="presentation"></select></div>
+    <div class="f"><label for="schedule">3. Schedule</label><select id="schedule"></select><div class="hint" id="schedulehint"></div></div>
+    <div id="presetpreview" class="hidden"></div>
+    <div id="customwrap" class="hidden">
+      <h3>Custom steps — dose + number of weeks for each step</h3>
+      <p class="hint">Each step can last a different number of weeks. Step weeks are NOT the administration frequency (set below).</p>
+      <div class="tablewrap"><table class="steps"><thead><tr><th>#</th><th>Dose</th><th>Unit</th><th>Weeks</th><th><span class="sr">Actions</span></th></tr></thead><tbody id="stepbody"></tbody></table></div>
+      <datalist id="weeklist"><option value="1"><option value="2"><option value="3"><option value="4"><option value="6"><option value="8"><option value="12"></datalist>
+      <datalist id="doselist"></datalist>
+      <div class="actions"><button class="btn small" id="addstep">+ Add step</button></div>
+    </div>
+    <div id="commonfields" class="hidden">
+      <h3>4. When</h3>
+      <div class="row"><div class="f"><label for="startdate">Start date</label><input id="startdate" type="date"></div>
+      <div class="f"><label for="freqmode">Administration frequency</label><select id="freqmode"><option value="daily">Daily</option><option value="weekly">Weekly (same weekday as start)</option><option value="every_n">Every N days</option><option value="weekdays">Selected weekdays</option></select></div></div>
+      <div class="f hidden" id="nwrap"><label for="ndays">Every how many days</label><input id="ndays" type="number" inputmode="numeric" min="1" max="90" step="1" value="2"></div>
+      <fieldset class="f hidden" id="wdwrap"><legend class="lbl">Weekdays</legend><div class="row" id="wdboxes"></div></fieldset>
+      <div id="mathwrap"><h3>5. Concentration &amp; syringe</h3><div id="mathfields"></div></div>
+      <h3>6. After the last step</h3>
+      <div class="f"><label><input type="radio" name="endmode" value="stop" checked> Stop after the last step</label>
+      <label><input type="radio" name="endmode" value="continue_last"> Continue the last step for a set number of extra weeks</label></div>
+      <div class="row hidden" id="contwrap"><div class="f"><label for="extraweeks">Extra weeks</label><input id="extraweeks" type="number" min="1" max="104" step="1" value="4"></div><div class="f"><label><input type="checkbox" id="contconfirm"> I confirm this continuation is my prescribed / intended plan</label></div></div>
+      <div class="row"><div class="f"><label for="planname">Plan name</label><input id="planname" maxlength="200"></div></div>
+      <div class="f"><label for="plannotes">Notes / where these instructions came from</label><textarea id="plannotes" rows="2" maxlength="500"></textarea></div>
+      <h3>7. Review generated dates and doses</h3>
+      <div id="review" aria-live="polite"></div>
+      <div class="actions"><button class="btn primary" id="saveplan">Add to calendar</button><button class="btn" id="canceledit">Cancel</button></div>
+    </div>
+  </div>
+</section>
+<section data-tab="lookup" id="tab-lookup" class="hidden" aria-labelledby="lookuptitle">
+  <div class="panel" id="lookuplist">
+    <h2 id="lookuptitle">Peptide lookup</h2>
+    <div class="notice kbbanner" role="note" id="kbbanner1"></div>
+    <div class="row"><div class="f"><label for="kbq">Search name or alias</label><input id="kbq" type="search" autocomplete="off" placeholder="e.g. BPC-157, sema, TB4"></div>
+    <div class="f"><label for="kbcat">Category</label><select id="kbcat"></select></div></div>
+    <p class="hint" id="kbcount" aria-live="polite"></p>
+    <div id="kbresults"></div>
+  </div>
+  <div class="panel hidden" id="lookupdetail">
+    <div class="daybar noprint"><button class="btn backbtn" id="kbback" type="button" aria-label="Back"><span aria-hidden="true">←</span> Back</button></div>
+    <div class="notice kbbanner" role="note" id="kbbanner2"></div>
+    <h2 id="kbtitle" tabindex="-1"></h2>
+    <div id="kbbody"></div>
+  </div>
+</section>
+<section data-tab="data" id="tab-data" class="hidden">
+  <div class="panel"><h2>Backup &amp; restore</h2>
+    <p class="hint">Your plans are stored only in this browser on this device. They are not encrypted, not synced and can be lost if browser data is cleared. Export a backup regularly.</p>
+    <div id="storageinfo" class="hint"></div><div id="legacybox"></div>
+    <div class="actions"><button class="btn primary" id="exportbtn">Export backup (.json)</button><button class="btn" id="importbtn">Import backup…</button><input type="file" id="importfile" accept="application/json,.json" class="hidden"></div>
+    <div id="datamsg" role="status" aria-live="polite"></div>
+    <div class="actions"><button class="btn danger" id="clearall">Delete all my data in this browser</button></div>
+  </div>
+  <div class="panel"><h2>Catalog &amp; evidence labels</h2>
+    <p class="hint">Legacy compound records are kept for provenance and are <strong>unverified</strong>. Many links are broad community libraries, not entry-specific evidence. Only presets shown with a “Label” badge are selectable; they were text-checked against DailyMed on 2026-11-02 and have not been clinician-reviewed.</p>
+    <div class="tablewrap"><table><thead><tr><th>Compound</th><th>Legacy classification</th><th>Status</th><th>Legacy source link</th></tr></thead><tbody id="catalogbody"></tbody></table></div>
+  </div>
+  <div class="panel"><h2>About</h2><p class="hint" id="about"></p></div>
+</section>
+</main>
+<nav class="tabs" role="tablist"><button role="tab" data-go="calendar" aria-selected="true">Calendar</button><button role="tab" data-go="plans" aria-selected="false">Plans</button><button role="tab" data-go="editor" aria-selected="false">Add plan</button><button role="tab" data-go="lookup" aria-selected="false">Lookup</button><button role="tab" data-go="data" aria-selected="false">Backup</button></nav>
+<script src="app.js"></script>
+</body></html>
