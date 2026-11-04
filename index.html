@@ -66,7 +66,7 @@
 <section data-tab="lookup" id="tab-lookup" class="hidden" aria-labelledby="lookuptitle">
   <div class="panel" id="lookuplist">
     <h2 id="lookuptitle">Peptide lookup</h2>
-    <div class="notice kbbanner" role="note" id="kbbanner1"></div>
+    <p class="kbref kbreftop" id="kbref1"></p>
     <div class="row"><div class="f"><label for="kbq">Search name or alias</label><input id="kbq" type="search" autocomplete="off" placeholder="e.g. BPC-157, sema, TB4"></div>
     <div class="f"><label for="kbcat">Category</label><select id="kbcat"></select></div></div>
     <p class="hint" id="kbcount" aria-live="polite"></p>
@@ -74,7 +74,6 @@
   </div>
   <div class="panel hidden" id="lookupdetail">
     <div class="daybar noprint"><button class="btn backbtn" id="kbback" type="button" aria-label="Back"><span aria-hidden="true">←</span> Back</button></div>
-    <div class="notice kbbanner" role="note" id="kbbanner2"></div>
     <h2 id="kbtitle" tabindex="-1"></h2>
     <div id="kbbody"></div>
   </div>
@@ -91,6 +90,7 @@
     <p class="hint">Legacy compound records are kept for provenance and are <strong>unverified</strong>. Many links are broad community libraries, not entry-specific evidence. Only presets shown with a “Label” badge are selectable; they were text-checked against DailyMed on 2026-11-02 and have not been clinician-reviewed.</p>
     <div class="tablewrap"><table><thead><tr><th>Compound</th><th>Legacy classification</th><th>Status</th><th>Legacy source link</th></tr></thead><tbody id="catalogbody"></tbody></table></div>
   </div>
+  <div class="panel"><h2>Disclaimer &amp; terms</h2><p class="hint" id="termsinfo">The disclaimer you agreed to when you first opened the app.</p><div class="actions"><button class="btn" id="termslink" type="button">Read the full Disclaimer and Terms of Use</button></div></div>
   <div class="panel"><h2>About</h2><p class="hint" id="about"></p></div>
 </section>
 </main>
